@@ -1,9 +1,11 @@
 options(stringsAsFactors = FALSE)
 options(digits.secs = 3)
+futname <- "MMH6@FORTS"
+fromwar <- TRUE
 
 Main <- function() {
   alpha <- 1.587214
-  info <- read.table("\\\\192.168.1.204\\share\\People\\ΐλεκρει\\CalculateBetaByDeals\\inparams.txt",
+  info <- read.table("\\\\192.168.1.204\\share\\People\\ΠΠ»ΠµΠΊΡΠµΠΉ\\CalculateBetaByDeals\\inparams.txt",
                      header = FALSE, sep = "=")
   filepath <- as.character(info[info[, 1] == "filepath", 2])
   print(filepath)
@@ -11,14 +13,17 @@ Main <- function() {
   print(datestart)
   dateend <- info[info[, 1] == "dateend", 2]
   print(dateend)
-  tab <- read.table(paste0(filepath), header = TRUE, sep = ";")
+  tab <- read.table(paste0(filepath), header = TRUE, sep = ";", row.names = NULL, dec = ",")
+  print(head(tab))
+  tab <- data.frame(LocalTime = tab[, 3], Security = tab[, 4], Volume = tab[, 5],
+                    Price = tab[, 6], Direction = tab[, 7])
   groupedtab <- GroupMMVBData(tab, datestart = datestart, dateend = dateend)
   groupedtab2 <- GroupRISIData(groupedtab)
   groupedtab2$beta <- groupedtab2$Price - alpha*0.00002*groupedtab2$PriceRI*groupedtab2$PriceSI
   atime <- Sys.time()
   atime <- gsub(" ", "_", as.character(atime))
   atime <- gsub(":", "-", atime)
-  myfile <- paste0("\\\\192.168.1.204\\share\\People\\ΐλεκρει\\CalculateBetaByDeals\\groupeddeals_", atime, ".csv")
+  myfile <- paste0("\\\\192.168.1.204\\share\\People\\ΠΠ»ΠµΠΊΡΠµΠΉ\\CalculateBetaByDeals\\groupeddeals_", atime, ".csv")
   print(head(groupedtab2))
   #groupedtab2 <- apply(groupedtab2, 2, as.character)
   #print(head(groupedtab2))
@@ -49,9 +54,14 @@ merge(tabMI, tabRS, by = "mmvbid")
 GroupMMVBData <- function(tab, raw = TRUE, datestart = "2015-01-01", dateend = "2115-01-01") {
   if (raw) {
     names(tab) <- tolower(names(tab))
-    tab$price[tab$security == "MMZ5@FORTS"] <- 100*tab$price[tab$security == "MMZ5@FORTS"]
+    print(head(tab))
+    tab$price[tab$security == futname] <- 100*tab$price[tab$security == futname]
     tab$direction <- ifelse(tab$direction == "Buy", 1, -1)
-    tab$tradetime <- as.POSIXct(tab$tradetime, format = "%d-%m-%Y %H:%M:%OS")
+    if (fromwar) {
+      tab$tradetime <- as.POSIXct(tab$localtime, format = "%d-%m-%Y %H:%M:%OS")
+    } else {
+      tab$tradetime <- as.POSIXct(tab$tradetime, format = "%d-%m-%Y %H:%M:%OS")
+    }
     tab$time <- NULL
     tab$time <- tab$tradetime
     tab$date <- as.Date(tab$time)

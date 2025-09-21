@@ -1,6 +1,6 @@
 library(zoo)
 
-GlueFilesForFinam <- function(storage = "\\\\192.168.1.204\\share\\People\\Алексей") {
+GlueFilesForFinam <- function(storage = "\\\\192.168.1.204\\share\\People\\???????") {
   filesaved <- paste(storage, "FinamData", "SPFB.MXI.saved.txt", sep = "\\")
   file <- paste(storage, "FinamData", "SPFB.MXI.txt", sep = "\\")
   GlueFilesForFinamServe(file, filesaved)
@@ -17,7 +17,7 @@ GlueFilesForFinamServe <- function(file, filesaved) {
   tab <- cbind(tabsaved, tab)
   write.table(tab, file, append = FALSE, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
 }
-Main <- function(winlen1 = 33, winlen2 = 3330, Type = "Z5", src, storage = "\\\\192.168.1.204\\share\\People\\Алексей") {
+Main <- function(winlen1 = 33, winlen2 = 3330, Type = "Z5", src, storage = "\\\\192.168.1.204\\share\\People\\???????") {
   inparams <- read.table(paste0(storage, "\\Results\\", "inparams.txt"), header = TRUE, sep = ",")
   winlen1 <- inparams$winlen1
   winlen2 <- inparams$winlen2
@@ -48,10 +48,9 @@ Main <- function(winlen1 = 33, winlen2 = 3330, Type = "Z5", src, storage = "\\\\
   legend("topleft", legend = c("market", "local", "global"), col = c("black", "red", "blue"), cex = 2.5, lty = c(1))
   dev.off()
   write.table(paste("Drawn graph type2, filename", file2), logfile, row.names = FALSE,  col.names = FALSE, append = TRUE)
-data.frame(Time = tab$mix.time, betalocal = beta1, betaglobal = beta2)
 }
 
-GetData <- function(Type = "Z5", src, storage = "\\\\192.168.1.204\\share\\People\\Алексей") {
+GetData <- function(Type = "Z5", src, storage = "\\\\192.168.1.204\\share\\People\\???????") {
   alpha <- 1.587214
   purlen <- 15
   quantlevel <- 0.05
@@ -61,7 +60,7 @@ GetData <- function(Type = "Z5", src, storage = "\\\\192.168.1.204\\share\\Peopl
     tabMMVB <- LoadBp(paste0("MM", Type, "@FORTS"), as.Date("2015-09-16"), Sys.Date(), "", storage.path = storage)
     if (nrow(tabMMVB) == 0) {
       stop("No data! Try Finam instead of FTBot!")
-    }  
+    }
     tabRTS <- LoadBp(paste0("RI", Type, "@FORTS"), as.Date("2015-09-16"), Sys.Date(), "", storage.path = storage)
     tabSI <- LoadBp(paste0("SI", Type, "@FORTS"), as.Date("2015-09-16"), Sys.Date(), "", storage.path = storage)
 
@@ -73,7 +72,7 @@ GetData <- function(Type = "Z5", src, storage = "\\\\192.168.1.204\\share\\Peopl
   } else if (src == "Finam") {
     tabMMVB <- read.table(paste(storage, "FinamData", "SPFB.MXI.txt", sep = "\\"), sep = ",", header = TRUE)
     tabRTS <- read.table(paste(storage, "FinamData", "SPFB.RTS.txt", sep = "\\"), sep = ",", header = TRUE)
-    tabSI <- read.table(paste(storage, "FinamData", "SPFB.Si.txt", sep = "\\"), sep = ",", header = TRUE)    
+    tabSI <- read.table(paste(storage, "FinamData", "SPFB.Si.txt", sep = "\\"), sep = ",", header = TRUE)
 
     tabMMVB <- Formatize(tabMMVB)
     tabRTS <- Formatize(tabRTS)
@@ -93,13 +92,12 @@ GetData <- function(Type = "Z5", src, storage = "\\\\192.168.1.204\\share\\Peopl
 
   mask <- MaskByTime(tab, c("10:15:00", "14:15:00", "19:05:00"), c("13:45:00", "18:35:00", "22:45:00"))
   tab <- tab[mask>0, ]
- 
+
   print(summary(tab))
   ind1 <- Purify2(tab, len = purlen*multip, strname = "mix.")
   ind2 <- Purify2(tab, len = purlen*multip, strname = "rts.")
   ind3 <- Purify2(tab, len = purlen*multip, strname = "si.")
   tab2 <- tab[-union(ind1, union(ind2, ind3)), ]
-###tab2 <- tab
 
   tab2$mix.close <- (tab2$mix.bid + tab2$mix.ask)/2
   tab2$mix.bid <- 100*tab2$mix.bid
@@ -109,13 +107,12 @@ GetData <- function(Type = "Z5", src, storage = "\\\\192.168.1.204\\share\\Peopl
   tab2$modelbid <- alpha*0.00002*tab2$rts.bid*tab2$si.bid
   tab2$modelclose <- (tab2$modelbid + tab2$modelask)/2
   tab2$diff <- tab2$mix.close - tab2$modelclose
-###return(tab2)
+
   tab3 <- KillQuantiles(tab2, quantlevel, "diff", purlen*multip)
 
-tab3  
+tab3
 }
 GetRollingBetas <- function(tab, winlen) {
-print("GetRollingBetas")
   vec0 <- tab$mix.close - tab$modelclose
   vec <-  rollmeanr(vec0, winlen)
   vec2 <- rollapplyr(vec0[1:winlen-1], winlen, mean, partial = TRUE)
