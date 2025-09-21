@@ -9,42 +9,10 @@ library(data.table)
 library(fasttime)
 #library(lubridate)
 
-Main <- function() {
-  params <- read.table("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\inparams.txt", sep = "=", header = FALSE)
-  filename1 <- params[params[, 1] == "filename1", 2]
-  filename2 <- params[params[, 1] == "filename2", 2]
-  secname1 <- params[params[, 1] == "secname1", 2]
-  secname2 <- params[params[, 1] == "secname2", 2]
-  src <- params[params[, 1] == "src", 2]
-  comparewith <- params[params[, 1] == "comparewith", 2]
-  mode <- params[params[, 1] == "mode", 2]
-  writefile1 <- params[params[, 1] == "datfile1", 2]
-  writefile2 <- params[params[, 1] == "datfile2", 2]
-
-  if (mode == "studyone") {
-    if (src == "Quick") {
-      dat <- GetDataFromQuick(filename1, filename2, secname1, secname2)
-    } else {
-      dat <- GetData(filename1, filename2, secname1, secname2)
-    }
-    if (comparewith == "Deals") {
-      deals <- HedgeComparison2(dat)
-    } else {
-      deals <- HedgeComparison4(dat)
-    }
-    mtab <- GetHedgeDiff(dat, deals)
-    write.table(data.frame(diff = mtab$tab$diff), 
-                paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\", writefile1), sep = ",",
-                row.names = FALSE, col.names = FALSE)
-    rrr <- Analyze(mtab)
-  } else {
-    rrr <- Compare2Traders(writefile1, writefile2)
-  }
-}
 DailyCallFromRValutaMain <- function() {
   res <- data.frame(trader = character(), type = character(), intervaltype = numeric(), left = numeric(), right = numeric(), len = numeric())
   res <- rbind(res, DailyCallFromRValuta(0))
-  res <- rbind(res, DailyCallFromRValuta(1))  
+  res <- rbind(res, DailyCallFromRValuta(1))
   res <- rbind(res, DailyCallFromRValuta(2))
   res <- rbind(res, DailyCallFromRValuta(3))
 
@@ -73,12 +41,12 @@ DailyCallFromRValuta <- function(intervaltype) {
   print(c("HFT", "orders", intervaltype))
   res <- rbind(res, data.frame(trader = "HFT", type = "Orders", intervaltype = intervaltype, left = 1000*confint[1], right = 1000*confint[2], len = confint[3]))
 if (TRUE) {
-  confint <- MAIN("D:\\ValuteTraders\\Kolya\\dealsMB0177810005.csv", 
+  confint <- MAIN("D:\\ValuteTraders\\Kolya\\dealsMB0177810005.csv",
        "D:\\ValuteTraders\\Kolya\\dealsR0L0L16.csv",
        secname1, secname2, src, "Deals", "studyone", "kolyadeals.csv", NA, intervaltype=intervaltype)
   print(c("kolya", "deals", intervaltype))
   res <- rbind(res, data.frame(trader = "Kolya", type = "Deals", intervaltype = intervaltype, left = 1000*confint[1], right = 1000*confint[2], len = confint[3]))
-  confint <- MAIN("D:\\ValuteTraders\\Kolya\\dealsMB0177810005.csv", 
+  confint <- MAIN("D:\\ValuteTraders\\Kolya\\dealsMB0177810005.csv",
        "D:\\ValuteTraders\\Kolya\\ordersR0L0L16.csv",
        secname1, secname2, src, "Orders", "studyone", "kolyaorders.csv", NA, intervaltype=intervaltype)
   print(c("kolya", "orders", intervaltype))
@@ -89,13 +57,13 @@ if (TRUE) {
   MAIN(NA, NA, NA, NA, NA, "Orders", "studytwo", "horsemanorders.csv", "kolyaorders.csv")
 }
 if (TRUE) {
-  confint <- MAIN("D:\\ValuteTraders\\Igor\\dealsMB0177809359.csv", 
+  confint <- MAIN("D:\\ValuteTraders\\Igor\\dealsMB0177809359.csv",
        "D:\\ValuteTraders\\Igor\\dealsR0L0L13.csv",
        secname1, secname2, src, "Deals", "studyone", "igordeals.csv", NA, intervaltype=intervaltype)
   print(c("igor", "deals", intervaltype))
   res <- rbind(res, data.frame(trader = "Igor", type = "Deals", intervaltype = intervaltype, left = 1000*confint[1], right = 1000*confint[2], len = confint[3]))
 }
-  confint <- MAIN("D:\\ValuteTraders\\Igor\\dealsMB0177809359.csv", 
+  confint <- MAIN("D:\\ValuteTraders\\Igor\\dealsMB0177809359.csv",
        "D:\\ValuteTraders\\Igor\\ordersR0L0L13.csv",
        secname1, secname2, src, "Orders", "studyone", "igororders.csv", NA, intervaltype=intervaltype)
   print(c("igor", "orders", intervaltype))
@@ -107,10 +75,10 @@ if (TRUE) {
   MAIN(NA, NA, NA, NA, NA, "Orders", "studytwo", "igororders.csv", "kolyaorders.csv")
 }
   MAIN("D:\\ValuteTraders\\SecondHorseman\\dealsMB0177808169.csv",
-       "D:\\ValuteTraders\\SecondHorseman\\dealsR0L0L00.csv", 
+       "D:\\ValuteTraders\\SecondHorseman\\dealsR0L0L00.csv",
        secname1, secname2, src, "Deals", "studyone", "horsemantwodeals.csv", NA, intervaltype=intervaltype)
   confint <- MAIN("D:\\ValuteTraders\\SecondHorseman\\dealsMB0177808169.csv",
-       "D:\\ValuteTraders\\SecondHorseman\\ordersR0L0L00.csv", 
+       "D:\\ValuteTraders\\SecondHorseman\\ordersR0L0L00.csv",
        secname1, secname2, src, "Orders", "studyone", "horsemantwoorders.csv", NA, intervaltype=intervaltype)
   print(c("oleg", "orders", intervaltype))
   res <- rbind(res, data.frame(trader = "Oleg", type = "Orders", intervaltype = intervaltype, left = 1000*confint[1], right = 1000*confint[2], len = confint[3]))
@@ -123,10 +91,10 @@ if (TRUE) {
   MAIN(NA, NA, NA, NA, NA, "Orders", "studytwo", "horsemantwoorders.csv", "igororders.csv")
 }
 if (intervaltype != 3) {
-  MAIN("D:\\ValuteTraders\\Ashot\\dealsMB0177809432.csv", 
+  MAIN("D:\\ValuteTraders\\Ashot\\dealsMB0177809432.csv",
        "D:\\ValuteTraders\\Ashot\\dealsR0L0LL3.csv",
        secname1, secname2, src, "Deals", "studyone", "ashotdeals.csv", NA, intervaltype=intervaltype)
-  confint <- MAIN("D:\\ValuteTraders\\Ashot\\dealsMB0177809432.csv", 
+  confint <- MAIN("D:\\ValuteTraders\\Ashot\\dealsMB0177809432.csv",
        "D:\\ValuteTraders\\Ashot\\ordersR0L0LL3.csv",
        secname1, secname2, src, "Orders", "studyone", "ashotorders.csv", NA, intervaltype=intervaltype)
   print(c("ashot", "orders", intervaltype))
@@ -138,7 +106,7 @@ if (intervaltype != 3) {
   MAIN(NA, NA, NA, NA, NA, "Deals", "studytwo", "ashotdeals.csv", "igordeals.csv")
   MAIN(NA, NA, NA, NA, NA, "Orders", "studytwo", "ashotorders.csv", "igororders.csv")
   MAIN(NA, NA, NA, NA, NA, "Deals", "studytwo", "ashotdeals.csv", "horsemantwodeals.csv")
-  MAIN(NA, NA, NA, NA, NA, "Orders", "studytwo", "ashotorders.csv", "horsemantwoorders.csv")  
+  MAIN(NA, NA, NA, NA, NA, "Orders", "studytwo", "ashotorders.csv", "horsemantwoorders.csv")
 }
 res
 }
@@ -151,11 +119,11 @@ DailyCallFromRStocks <- function() {
 
   weights1 <- c(100, 10)
   weights2 <- c(10, 100)
-  
+
   if (TRUE) {
     confint <- MAIN("D:\\ValuteTraders\\Elvina\\dealsR0L0100.csv",
        "D:\\ValuteTraders\\Elvina\\dealsL01+00000F00.csv",
-      secname2, secname1, src, "Deals", "studyone", "elvinadealsalt.csv", NA, weights = weights1, eps = eps)
+       secname2, secname1, src, "Deals", "studyone", "elvinadealsalt.csv", NA, weights = weights1, eps = eps)
     res <- rbind(res, data.frame(trader = "Elvina", type = "Deals", left = 1000*confint[1], right = 1000*confint[2], len = confint[3]))
     confint <- MAIN("D:\\ValuteTraders\\Elvina\\dealsR0L0100.csv",
        "D:\\ValuteTraders\\Elvina\\ordersL01+00000F00.csv",
@@ -182,7 +150,7 @@ DailyCallFromRStocks <- function() {
   res <- rbind(res, data.frame(trader = "Horseman3", type = "Orders", left = 1000*confint[1], right = 1000*confint[2], len = confint[3]))
   MAIN(NA, NA, NA, NA, NA, "Deals", "studytwo", "elvinadeals.csv", "horsemanthreedeals.csv")
   MAIN(NA, NA, NA, NA, NA, "Orders", "studytwo", "elvinaorders.csv", "horsemanthreeorders.csv")
-  if (FALSE) { 
+  if (FALSE) {
     MAIN("D:\\ValuteTraders\\ThirdHorseman\\dealsL08+00000F05.csv",
        "D:\\ValuteTraders\\ThirdHorseman\\dealsR0L0L17.csv",
        secname1, secname2, src, "Deals", "studyone", "horsemanthreedealsalt.csv", NA, weights = weights2, eps = eps)
@@ -224,11 +192,10 @@ MAIN <- function(filename1, filename2, secname1, secname2, src, comparewith, mod
     } else {
       deals <- HedgeComparison4(dat, eps = eps)
     }
-print(summary(deals))
     mtab <- GetHedgeDiff(dat, deals)
 
-    write.table(data.frame(diff = mtab$tab$diff), 
-                paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\", writefile1), sep = ",",
+    write.table(data.frame(diff = mtab$tab$diff),
+                paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\", writefile1), sep = ",",
                 row.names = FALSE, col.names = FALSE)
     rrr <- Analyze(mtab)
   } else {
@@ -237,12 +204,12 @@ print(summary(deals))
 rrr
 }
 Compare2Traders <- function(writefile1, writefile2) {
-  dat1 <- read.table(paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\", writefile1), header = FALSE, sep = ",")
-  dat2 <- read.table(paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\", writefile2), header = FALSE, sep = ",")
+  dat1 <- read.table(paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\", writefile1), header = FALSE, sep = ",")
+  dat2 <- read.table(paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\", writefile2), header = FALSE, sep = ",")
   dat1 <- dat1[, 1]
   dat2 <- dat2[, 1]
   LOG <- paste0("log_", Sys.Date(), ".txt")
-  filename <- paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\", LOG)
+  filename <- paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\", LOG)
   write.table(paste("Comparing data from", writefile1, "and", writefile2), filename, row.names = FALSE, col.names = FALSE, append = TRUE)
   res1 <- wilcox.test(dat1, dat2, conf.int = TRUE)
   confint <- as.numeric(res1$conf.int)
@@ -255,7 +222,7 @@ Compare2Traders <- function(writefile1, writefile2) {
   confint <- as.numeric(res1$conf.int)
   val <- as.numeric(res1$estimate)
   write.table(paste("Mean difference between 2 samples without of top outliers is", val), filename, row.names = FALSE, col.names = FALSE, append = TRUE)
-  write.table(paste("95%-percent confidence interval of mean difference between 2 samples without of top outliers is", confint[1], "to", confint[2]), filename, row.names = FALSE, append = TRUE, col.names = FALSE)  
+  write.table(paste("95%-percent confidence interval of mean difference between 2 samples without of top outliers is", confint[1], "to", confint[2]), filename, row.names = FALSE, append = TRUE, col.names = FALSE)
 }
 GetDataFromQuick <- function(filename1, filename2, secname1, secname2, weights = NA) {
   if (is.na(weights[1])) {weights <- c(1, 1)}
@@ -279,17 +246,12 @@ print(secname)
   }
   print(date)
   tab$Date <- paste0(date, " ", tab$Time, ".", tab$MS)
-  tab$Volume <- weight*ifelse(tab$Side == "Buy", 1, -1)*tab$Volume
-print("hee")
+  tab$Volume <- weight*ifelse(tab$Side == "?????", 1, -1)*tab$Volume
   tab$Date <- as.POSIXct(as.character(tab$Date), origin = origin)
-print(head(tab))
   tab <- tab[order(tab$Date), ]
   tab <- tab[tab$Security == secname, ]
-  tab$id <- 1:nrow(tab)  
-  tab$Time <- tab$Date
-  tab <- as.data.table(tab)
-print(head(tab))
-setkey(tab, "Time")
+  tab$id <- 1:nrow(tab)
+tab
 }
 GetTimesByIntervaltype <- function(intervaltype) {
   if (intervaltype == 0) {
@@ -307,11 +269,28 @@ GetTimesByIntervaltype <- function(intervaltype) {
   }
 c(timestart, timeend)
 }
+GetMetroTradeDates <- function(startdate, enddate, storage, secname) {
+  res <- data.table(Date = character(), DateCancel = character(), Security = character(),  Side = character(), Price = numeric(), Volume = numeric())
+  for (adate in seq(startdate, enddate, 1)) {
+    adate <- as.Date(adate)
+    print(adate)
+    file <- list.files(storage, pattern = as.character(adate))
+    if (length(file) > 0) {
+      res <- rbind(res, fread(file.path(storage, file), dec = ",", drop = c(1, 6, 7, 10, 11, 12, 13, 14)))
+    }
+  }
+  print(names(res))
+  res <- res[Security == secname, ]
+  res[, Time := fastPOSIXct(Date, tz = "GMT")]
+  res[, Date := as.Date(Time)]
+  res[, DateCancel := fastPOSIXct(DateCancel, tz = "GMT")]
+setkey(res, Time)
+}
 GetDataFromMetroplexPart <- function(filename, secname, weight = 1, intervaltype = 0, dates = NA) {
   times <- GetTimesByIntervaltype(intervaltype)
   timestart <- times[1]
   timeend <- times[2]
-  tab <- fread(filename)
+  tab <- fread(filename, dec = ",")
   setkey(tab, "Security")
   tab <- tab[list(secname)]
   tab[, Time := fastPOSIXct(Date, tz = "GMT")]
@@ -320,6 +299,8 @@ GetDataFromMetroplexPart <- function(filename, secname, weight = 1, intervaltype
   #tab <- tab[order(tab$Date), ]
   #tab$Volume <- weight*tab$Volume*ifelse(tab$Side == "Buy", 1, -1)
   #tab$Date <- as.POSIXct(tab$Date, origin = origin)
+  print(paste0("weight is", weight))
+  print(secname)
   tab[, ":="(Volume = weight*Volume*ifelse(Side == "Buy", 1, -1), Date = as.Date(Time))]
   if (!is.na(dates)) {
     print(dates)
@@ -339,12 +320,12 @@ HedgeComparison1 <- function(dat, eps = 0.1) {
   deals <- dat$deals
   orders <- dat$orders
   orders$matched <- FALSE
-  deals$hedgeid <- NA 
+  deals$hedgeid <- NA
   for (j in 1:nrow(deals)) {
     print(j)
     time0 <- as.POSIXct(deals$Time[j])
     ordersred <- orders[(!orders$matched) & (orders$Time >= time0) & (orders$Time <= time0 + 60), ]
-    print(nrow(ordersred))    
+    print(nrow(ordersred))
     if (nrow(ordersred) > 0) {
       vol <- deals$Volume[j]
       ordersred2 <- ordersred[abs(ordersred$Volume - (-vol))<=eps, ]
@@ -361,12 +342,12 @@ HedgeComparison3 <- function(dat) {
   deals <- dat$deals
   orders <- dat$orders
   orders$matched <- 0
-  deals$hedgeid <- NA 
+  deals$hedgeid <- NA
   for (j in 1:nrow(deals)) {
     print(paste("starting", j))
     time0 <- as.POSIXct(deals$Time[j])
     vol <- deals$Volume[j]
-    ordersred <- orders[(orders$Time >= time0) & (orders$Time <= time0 + 60) & 
+    ordersred <- orders[(orders$Time >= time0) & (orders$Time <= time0 + 60) &
                           (orders$matched + vol <= abs(orders$Volume) + 0.1) &
                           (orders$Volume*vol < 0), ]
     if (nrow(ordersred) > 0) {
@@ -377,15 +358,22 @@ HedgeComparison3 <- function(dat) {
   }
 deals
 }
-HedgeComparison2 <- function(dat, eps = 0.1) {
+HedgeComparison2 <- function(dat, eps = 0.1, lowlen = 0, uplen = 60) {
   deals <- dat$deals
   orders <- dat$orders
   orders$matched <- FALSE
-  deals$hedgeid <- NA 
+  deals$hedgeid <- NA
+  deals$hedgeidmin <- NA
+#  deals$TimeNum <- as.numeric(deals$Time) - as.numeric(deals$Time[1])
+#  orders$TimeNum <- as.numeric(orders$Time) - as.numeric(orders$Time[1])
+#  setkey(deals, "TimeNum")
+#  setkey(orders, "TimeNum")
+  deals <- deals[order(Time), ]
+  orders <- orders[order(Time), ]
 
   for (j in 1:nrow(deals)) {
     time0 <- as.POSIXct(deals$Time[j])
-     ordersred <- orders[(!orders$matched) & (orders$Time >= time0) & (orders$Time <= time0 + 60), ]
+     ordersred <- orders[(!orders$matched) & (orders$Time >= time0 + lowlen) & (orders$Time <= time0 + uplen), ]
     if (nrow(ordersred) > 0) {
       vol <- deals$Volume[j]
       finpos <- which(ordersred$Volume*vol > 0)
@@ -402,6 +390,7 @@ HedgeComparison2 <- function(dat, eps = 0.1) {
         oidmin <- ordersred$id[1]
         oid <- ordersred$id[chosenpos]
         deals$hedgeid[j] <- oid
+        deals$hedgeidmin[j] <- ordersred$id[1]
         orders$matched[orders$id >= oidmin & orders$id <= oid] <- TRUE
       } else {}
     } else {}
@@ -412,7 +401,7 @@ HedgeComparison4 <- function(dat, eps = 0.1) {
   deals <- dat$deals
   orders <- dat$orders
   orders$matched <- 0
-  deals$hedgeid <- NA 
+  deals$hedgeid <- NA
   for (j in 1:nrow(deals)) {
     time0 <- as.POSIXct(deals$Time[j])
     vol <- deals$Volume[j]
@@ -428,14 +417,24 @@ HedgeComparison4 <- function(dat, eps = 0.1) {
   }
 deals
 }
-GetHedgeDiff <- function(dat, deals) {
+GetHedgeDiff <- function(dat, deals, fullmode = FALSE) {
   orders <- dat$orders
   tot <- nrow(deals)
   deals <- deals[!is.na(deals$hedgeid), ]
   rel1 <- nrow(deals)/tot
   names(orders) <- tolower(names(orders))
-  mtab <- cbind(deals, orders[deals$hedgeid, ]) 
+  mtab <- cbind(deals, orders[deals$hedgeid, ])
   mtab$diff <- as.numeric(mtab$time - mtab$Time, units = "secs")
+  if (fullmode) {
+    for (i in 1:nrow(mtab)) {
+      hedgemin <- deals$hedgeidmin[i]
+      hedgemax <- deals$hedgeid[i]
+      truevolume <- sum(abs(orders$volume[hedgemin:hedgemax]))
+      trueprice <- sum(abs(orders$volume[hedgemin:hedgemax]*orders$price[hedgemin:hedgemax]))/truevolume
+      mtab$volume[i] <- truevolume
+      mtab$price[i] <- trueprice
+    }
+  }
 list(tab = mtab, val = rel1)
 }
 Analyze <- function(info) {
@@ -450,7 +449,7 @@ Analyze <- function(info) {
   atime <- gsub(":", "-", atime)
 
   LOG <- paste0("log_", Sys.Date(), ".txt")
-  filename <- paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\", LOG)  
+  filename <- paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\", LOG)
   write.table("Started analysis", filename, row.names = FALSE, col.names = FALSE, append = TRUE)
   write.table(paste("Using", 100*val, "percent of available data"), filename, row.names = FALSE, col.names = FALSE, append = TRUE)
   res1 <- wilcox.test(tab$diff, conf.int = TRUE)
@@ -458,7 +457,7 @@ Analyze <- function(info) {
   val <- as.numeric(res1$estimate)
   write.table(paste("Mean estimate in seconds is", val), filename, row.names = FALSE, col.names = FALSE, append = TRUE)
   write.table(paste("95%-percent confidence interval in seconds is from", confint[1], "to", confint[2]), filename, row.names = FALSE, col.names = FALSE, append = TRUE)
-  pict <- paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\pict_", atime, ".jpeg")
+  pict <- paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\pict_", atime, ".jpeg")
   jpeg(pict, width = 1900, height = 1200)
   plot(tab$Date, tab$diff, ylab = "Hedge time in seconds")
   dev.off()
@@ -472,7 +471,7 @@ Analyze <- function(info) {
   val <- as.numeric(res1$estimate)
   write.table(paste("Mean estimate without of top outliers in seconds is", val), filename, row.names = FALSE, col.names = FALSE, append = TRUE)
   write.table(paste("95%-percent confidence interval in seconds witout of top outliers is from", confint[1], "to", confint[2]), filename, row.names = FALSE, append = TRUE, col.names = FALSE)
-  pict <- paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\pictrobust_", atime, ".jpeg")
+  pict <- paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\pictrobust_", atime, ".jpeg")
   jpeg(pict, width = 1900, height = 1200)
   plot(tab$Date, tab$diff, ylab = "Hedge time in seconds")
   dev.off()
@@ -482,22 +481,26 @@ Analyze <- function(info) {
   ###here we apply bootstrapping:
   bootstrapresult <- BootStrapMeanEstimate(tab$diff)
   write.table(paste("Bootstrap estimate", bootstrapresult$estimate), filename, row.names = FALSE, col.names = FALSE, append = TRUE)
-  write.table(paste("Bootstrap confidence interval: from", bootstrapresult$conf.int[1], 
-                    "to", bootstrapresult$conf.int[2]), 
-                    filename, row.names = FALSE, col.names = FALSE, append = TRUE)   
+  write.table(paste("Bootstrap confidence interval: from", bootstrapresult$conf.int[1],
+                    "to", bootstrapresult$conf.int[2]),
+                    filename, row.names = FALSE, col.names = FALSE, append = TRUE)
   print(c(bootstrapresult$conf.int[1], bootstrapresult$conf.int[2], nrow(tab)))
 c(bootstrapresult$conf.int[1], bootstrapresult$conf.int[2], nrow(tab))
 }
-BootStrapMeanEstimate <- function(vec) { 
+BootStrapMeanEstimate <- function(vec, withlog = FALSE) {
   samplemean <- function(x, d) {
     mean(x[d])
   }
-
+  if (withlog) {vec <- log(vec)}
   bootdat <- boot(vec, samplemean, 10000)
   resvec <- bootdat$t
   alpha <- 0.025
   resvec <- resvec[resvec > as.numeric(quantile(resvec, alpha)) & resvec < as.numeric(quantile(resvec, 1-alpha))]
-list(conf.int = c(min(resvec), max(resvec)), estimate = mean(resvec))
+  if (withlog) {
+    return(list(conf.int = c(exp(min(resvec)), exp(max(resvec))), estimate = exp(mean(resvec))))
+  } else {
+    return(list(conf.int = c(min(resvec), max(resvec)), estimate = mean(resvec)))
+  }
 }
 BootStrapMedianEstimate <- function(vec) {
   samplemedian <- function(x, d) {
@@ -525,7 +528,7 @@ MultiSlippageWizard <- function(intervaltype, datestart, dateend, skiptoanalysis
       delme <- MainSlippageWizard(tab, intervaltype, appendmode = TRUE, dates = date0)
     }
   }
-  res <- data.frame(trader = character(), intervaltype = numeric(), left = numeric(), right = numeric(), 
+  res <- data.frame(trader = character(), intervaltype = numeric(), left = numeric(), right = numeric(),
                     len = numeric(), medleft = numeric(), medright = numeric())
   traderres <- AnalysisWizard("horsemanone", intervaltype = intervaltype)
   res <- rbind(res, data.frame(trader = "horsemanone", intervaltype = intervaltype, left = traderres[1], right = traderres[2],
@@ -561,7 +564,7 @@ MultiSlippageWizardStocks <- function(intervaltype, datestart, dateend, skiptoan
       print("next")
     }
   }
-  res <- data.frame(trader = character(), intervaltype = numeric(), left = numeric(), right = numeric(), 
+  res <- data.frame(trader = character(), intervaltype = numeric(), left = numeric(), right = numeric(),
                     len = numeric(), medleft = numeric(), medright = numeric())
   traderres <- AnalysisWizard("elvina", intervaltype = intervaltype)
   res <- rbind(res, data.frame(trader = "elvina", intervaltype = intervaltype, left = traderres[1], right = traderres[2],
@@ -575,7 +578,7 @@ MultiSlippageWizardStocks <- function(intervaltype, datestart, dateend, skiptoan
 res
 }
 AnalysisWizard <- function(trader, intervaltype = 0) {
-  filename <- paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\slippage", trader, ".txt")
+  filename <- paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\slippage", trader, ".txt")
   print(filename)
   slippagevec <- read.table(filename, header = FALSE, sep = ",")
   slippagevec <- data.frame(time = slippagevec[, 1], slippage = slippagevec[, 2])
@@ -586,7 +589,7 @@ AnalysisWizard <- function(trader, intervaltype = 0) {
     slippagevec <- slippagevec[as.POSIXlt(slippagevec$time)$hour >= timestart & as.POSIXlt(slippagevec$time)$hour <= timeend, ]
   }
   slippagevec <- slippagevec$slippage
-  slippagevec <- slippagevec[slippagevec <= as.numeric(quantile(slippagevec, 0.95)) & 
+  slippagevec <- slippagevec[slippagevec <= as.numeric(quantile(slippagevec, 0.95)) &
                              slippagevec >= as.numeric(quantile(slippagevec, 0.05))]
   bootstrapresult <- BootStrapMeanEstimate(slippagevec)
   bootstrapresult2 <- BootStrapMedianEstimate(slippagevec)
@@ -596,11 +599,11 @@ MainSlippageWizard <- function(hedgedat, intervaltype, appendmode = FALSE, dates
   secname1 <- "USD000UTSTOM@CETS"
   secname2 <- "SIZ5@FORTS"
   src <- "Metroplex"
-  res <- data.frame(trader = character(), intervaltype = numeric(), left = numeric(), right = numeric(), 
+  res <- data.frame(trader = character(), intervaltype = numeric(), left = numeric(), right = numeric(),
                     len = numeric(), medleft = numeric(), medright = numeric())
   temp <- SlippageWizard("D:\\ValuteTraders\\FirstHorseman\\dealsMB0177809279.csv",
                          "D:\\ValuteTraders\\FirstHorseman\\dealsR0L0LL0.csv", secname1, secname2, src, hedgedat, "horsemanone", intervaltype = intervaltype, appendmode = appendmode, dates = dates)
-  res <- rbind(res, data.frame(trader = "HFT", intervaltype = intervaltype, left = temp[1], right = temp[2], 
+  res <- rbind(res, data.frame(trader = "HFT", intervaltype = intervaltype, left = temp[1], right = temp[2],
                                len = temp[3], medleft = temp[4], medright = temp[5]))
   temp <- SlippageWizard("D:\\ValuteTraders\\Kolya\\dealsMB0177810005.csv",
                          "D:\\ValuteTraders\\Kolya\\dealsR0L0L16.csv", secname1, secname2, src, hedgedat, "kolya", intervaltype = intervaltype, appendmode = appendmode, dates = dates)
@@ -616,7 +619,7 @@ MainSlippageWizard <- function(hedgedat, intervaltype, appendmode = FALSE, dates
                                medleft = temp[4], medright = temp[5]))
   temp <- SlippageWizard("D:\\ValuteTraders\\Ashot\\dealsMB0177809432.csv",
                          "D:\\ValuteTraders\\Ashot\\dealsR0L0LL3.csv", secname1, secname2, src, hedgedat, "ashot", intervaltype = intervaltype, appendmode = appendmode, dates = dates)
-  res <- rbind(res, data.frame(trader = "Ashot", intervaltype = intervaltype, left = temp[1], right = temp[2], 
+  res <- rbind(res, data.frame(trader = "Ashot", intervaltype = intervaltype, left = temp[1], right = temp[2],
                                len = temp[3], medleft = temp[4], medright = temp[5]))
 res
 }
@@ -626,7 +629,7 @@ MainSlippageWizardStocks <- function(hedgedat, intervaltype, appendmode = FALSE,
   eps <- 50
   weights <- c(100, 10)
   src <- "Metroplex"
-  res <- data.frame(trader = character(), intervaltype = numeric(), left = numeric(), right = numeric(), 
+  res <- data.frame(trader = character(), intervaltype = numeric(), left = numeric(), right = numeric(),
                     len = numeric(), medleft = numeric(), medright = numeric())
   temp <- SlippageWizard("D:\\ValuteTraders\\Elvina\\dealsR0L0100.csv",
                          "D:\\ValuteTraders\\Elvina\\dealsL01+00000F00.csv", secname2, secname1, src, hedgedat, "elvina", intervaltype = intervaltype, appendmode = appendmode, dates = dates,
@@ -660,7 +663,7 @@ print(weights)
     mtab <- GetHedgeDiff(dat, deals)
     mtab2 <- mtab$tab
     mtab2 <- as.data.table(mtab2)
-    setkey(mtab2, "time")    
+    setkey(mtab2, "time")
 
     #print(head(mtab2))
     #ids <- GetInfoByTimes(mtab2, hedgedat, "Time")
@@ -681,7 +684,7 @@ print(weights)
     res <- SlippageAnalysis(data.frame(time = mtab2$time, slippage = slippagevec), idname, appendmode = appendmode)
   } else {
     #we take the data from the file
-    sliptab <- read.table(paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\slippage", idname, ".txt"), sep = ",", header = FALSE)
+    sliptab <- read.table(paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\slippage", idname, ".txt"), sep = ",", header = FALSE)
     times <- GetTimesByIntervaltype(intervaltype)
     timestart <- times[1]
     timeend <- times[2]
@@ -694,9 +697,9 @@ res
 SlippageAnalysis <- function(slippagevec, idname, appendmode = FALSE) {
   #first we write down data about slippage
   print("ready to write down")
-  write.table(slippagevec, paste0("\\\\192.168.1.204\\share\\People\\Алексей\\CompaisonResults\\slippage", idname, ".txt"), row.names = FALSE, col.names = FALSE, append = appendmode, sep = ",")
+  write.table(slippagevec, paste0("\\\\192.168.1.204\\share\\People\\???????\\CompaisonResults\\slippage", idname, ".txt"), row.names = FALSE, col.names = FALSE, append = appendmode, sep = ",")
   slippagevec <- slippagevec$slippage
-  slippagevec <- slippagevec[slippagevec <= as.numeric(quantile(slippagevec, 0.95)) & 
+  slippagevec <- slippagevec[slippagevec <= as.numeric(quantile(slippagevec, 0.95)) &
                              slippagevec >= as.numeric(quantile(slippagevec, 0.05))]
   bootstrapresult <- BootStrapMeanEstimate(slippagevec)
   bootstrapresult2 <- BootStrapMedianEstimate(slippagevec)
@@ -708,7 +711,7 @@ CalculateSlippageServe <- function(sliptab, slipnames) {
   if (sliptab$Side == "Buy") {
     return(as.numeric(sliptab$Bid) - as.numeric(sliptab$price))
   } else if (sliptab$Side == "Sell") {
-    return(as.numeric(sliptab$price) - as.numeric(sliptab$Ask))   
+    return(as.numeric(sliptab$price) - as.numeric(sliptab$Ask))
   } else {stop("Unknown format of Side in deals")}
 }
 GetFutQuotes <- function(instrname, datestart, dateend) {
@@ -733,63 +736,3 @@ GetInfoByTime <- function(time0, df, securname) {
 al <- temp[length(temp)]
 unlist(al)
 }
-###taken from qlib
-# load bp from file
-LoadBpFile <- function(file, only.main.session=F, start.time=NULL, end.time=NULL) {
-	#df <- read.csv2(file, as.is = TRUE, na.strings="-1")
-        df <- fread(file, na.strings = "-1", drop = 4)
-        df[, Time := fastPOSIXct(Time, tz = "GMT")]
-        date0 <- as.Date(df$Time[1])
-        df[, Date := rep(date0, nrow(df))]
-	if(only.main.session)
-	{
-		# only main session = T => use 10:00-18:45
-		dates <- df$Date
-		df <- df[dates + hm("10:00") <= df$Time &
-						 	df$Time < dates + hm("18:45"),  ]
-	}
-	else if(!is.null(start.time)){
-		# only main session = F and start.time != NULL => use [start.time - end.time]
-		dates <- df$Date
-		df <- df[dates + hm(start.time) <= df$Time &
-						 	df$Time < dates + hm(end.time),  ]
-	}
-	df
-}
-
-# take some bid-ask data from storage [one day], use hh:mm for specific time period
-LoadBpDay <- function(instrument, date, candle.type="1m", only.main.session=F, start.time=NULL, end.time=NULL, storage.path=file.path("//192.168.1.12","historical_data", "PLAZA","bp")) {
-  dir <- file.path(storage.path, candle.type, instrument)
-  file <- list.files(dir, pattern=as.character(date, "%Y_%m_%d"))
-  if(length(file)==0)print(paste0(instrument,"!: ",as.character(date, "%Y_%m_%d")," not found"))
-  if (length(file) > 0) {
-    ticks <- LoadBpFile(file.path(dir, file), only.main.session, start.time, end.time)
-  } else {
-    ticks <- CreateBp()
-  }
-  ticks
-}
-
-# download bid-ask data from local storage [start.date,end.date]
-LoadBp <- function(instrument, start.date, end.date, candle.type="1m", only.main.session=F, start.time=NULL, end.time=NULL, storage.path=file.path("//192.168.1.12","historical_data", "PLAZA","bp")) {
-		start.date <- as.Date(start.date, origin=origin)
-		end.date <- as.Date(end.date, origin=origin)
-	as.data.table(
-		do.call(
-			rbind, lapply(as.Date(start.date:end.date, origin=origin), function(date) {
-				LoadBpDay(instrument, date, candle.type, only.main.session, start.time, end.time, storage.path)
-			})
-		)
-	)
-}
-CreateBp <- function() {
-	data.frame(
-		Time=as.POSIXct(numeric(), origin=origin),
-		Bid=numeric(),
-		Ask=numeric(),
-		Date=as.Date(numeric(), origin=origin),
-		stringsAsFactors = FALSE
-	)
-}
-
-	

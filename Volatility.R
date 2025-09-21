@@ -1,9 +1,9 @@
-MyGetVolatilityServe <- function(adate, tab, len) {
+MyGetVolatilityServe <- function(adate, tab, len, acol = "stavka") {
   tabred  <- tab[Date == adate, ]
-sd(tabred[seq(1, nrow(tabred), len), stavka])
+sd(tabred[seq(1, nrow(tabred), len), acol, with = FALSE][[1]])
 }
-MyGetVolatility <- function(tab, len) {
-data.frame(Date = unique(tab$Date), Val = sapply(unique(tab$Date), "MyGetVolatilityServe", tab = tab, len = len))
+MyGetVolatility <- function(tab, len, acol = "stavka") {
+data.frame(Date = unique(tab$Date), Val = sapply(unique(tab$Date), "MyGetVolatilityServe", tab = tab, len = len, acol = acol))
 }
 #TimeNum --- numeric version of Time
 EstimateVolatilityForTimeMoment1 <- function(tab, atime, loclen = 300, globlen = 600, aname) {
